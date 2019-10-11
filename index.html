@@ -1,0 +1,153 @@
+<html>
+
+<head>
+    <title>Y.js Concurrent editing sandbox</title>
+    <script type="text/javascript" src="./index.js"></script>
+
+    <script>
+        var user = '';
+        function setUser() {
+            user = document.getElementById('user').value;
+        }
+        // Sloppy event handlers to trigger Y.js updates
+        function setToggle() {
+            var chkToggle = document.getElementsByName("checkbox1");
+            y.share.map.set('checkbox1', { user: document.getElementById('user').value, value: chkToggle[0].checked });
+            var user = document.getElementById('user').value;
+        }
+        function lock(user) {
+            console.log(`${user} has locked field1`);
+            y.share.map.set('textfield1', { user: document.getElementById('user').value, value: 'lock' });
+        }
+        function unlock(user) {
+            console.log(`${user} has unlocked field1`);
+            y.share.map.set('textfield1', { user: document.getElementById('user').value, value: 'unlock' });
+        }
+        function lockTimed(user) {
+            console.log(`${user} has locked field2`);
+            countDown();
+            document.getElementById('textfield2').style.backgroundColor = "rgb(207, 250, 207)";
+            y.share.map.set('textfield2', { user: document.getElementById('user').value, value: 'lock' });
+        }
+        function unlockTimed(user) {
+            console.log(`${user} has unlocked field2`);
+            document.getElementById('textfield2').style.backgroundColor = "white";
+            y.share.map.set('textfield2', { user: document.getElementById('user').value, value: 'unlock' });
+        }
+
+        // Resettable timer to maintain a field lock while it is active.
+        var timerId
+        function countDown() {
+            var timerId = setTimeout(function () {
+                document.getElementById('textfield2').style.backgroundColor = "white";
+                unlockTimed(user);
+            }, 4000);
+        }
+        function resetTimer() {
+            document.getElementById('textfield2').style.backgroundColor = "rgb(207, 250, 207)";
+            y.share.map.set('textfield2', { user: document.getElementById('user').value, value: 'lock' });
+            window.clearTimeout(timerId);
+            countDown();
+        }
+
+    </script>
+    <style>
+        #checkbox1_user {
+            color: white;
+            background-color: blue;
+            border-radius: 2px;
+            padding: 2px 4px;
+            display: none;
+        }
+
+        #textfield1_user {
+            color: white;
+            background-color: blue;
+            border-radius: 0px 3px 3px 0px;
+            padding: 2px 4px;
+            display: none;
+        }
+
+        #textfield1:focus {
+            background-color: rgb(207, 250, 207);
+        }
+
+        #textfield2_user {
+            color: white;
+            background-color: blue;
+            border-radius: 0px 3px 3px 0px;
+            padding: 2px 4px;
+            display: none;
+        }
+
+        #textfield2:focus {
+            background-color: rgb(207, 250, 207);
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 20px;
+        }
+
+        .desc {
+            margin: 5px 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .demo-field {
+            margin: 10px;
+        }
+
+        .demo-field-text-full {
+            display: block;
+        }
+
+        .demo-field-text-expire {
+            display: block;
+        }
+        #editor {
+            border: 1px solid gray;
+            border-radius: 2px;
+            min-height: 100px;
+            width: 50%; 
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Y-JS test</h1>
+    <form>
+        <div>
+            <strong>Name: </strong><input type="text" id="user" onblur="setUser();" />
+            <div class="desc">Fill this out first to set your User Id!</div>
+        </div>
+        <div>
+            <h2>Synced fields</h2>
+        </div>
+        <div class="demo-field">
+            <div class="demo-field-text-full">
+                Text field: <input type="text" id="textfield1" rows="1"
+                    onfocus="lock(document.getElementById('user').value);"
+                    onblur="unlock(document.getElementById('user').value);" ; /><span id="textfield1_user"></span>
+            </div>
+            <div class="desc">Field-level lock maintained while the field is focused by a different user.</div>
+        </div>
+        <div class="demo-field">
+            <input type="checkbox" onclick="setToggle()" value="yes" checked=true name="checkbox1">Checkbox</input>
+            <span id="checkbox1_user"></span>
+            <div class="desc">Real time changes are permitted for this single-state control.</div>
+        </div>
+        <div class="demo-field">
+            <div class="demo-field-text-expire">
+                Text field: <input type="text" id="textfield2" rows="1"
+                    onfocus="lockTimed(document.getElementById('user').value);"
+                    onclick="lockTimed(document.getElementById('user').value);" oninput="resetTimer();"
+                    onblur="unlockTimed(document.getElementById('user').value);" ; /><span id="textfield2_user"></span>
+            </div>
+            <div class="desc">Field-level lock expires after 4 seconds of inactivity. (buggy)</div>
+        </div>
+    </form>
+</body>
+
+</html>

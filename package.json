@@ -1,0 +1,24 @@
+{
+  "name": "yjs-field-demo",
+  "version": "1.0.0",
+  "description": "Demo of field syncronization and locking with Y.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "parcel index.html",
+    "build": "parcel build --public-url . index.html"
+  },
+  "author": "Chaz Cheadle",
+  "license": "ISC",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
+  },
+  "dependencies": {
+    "y-array": "^10.1.4",
+    "y-map": "^10.1.3",
+    "y-memory": "^8.0.9",
+    "y-text": "^9.5.1",
+    "y-websockets-client": "^8.0.16",
+    "yjs": "^12.3.3"
+  }
+}
